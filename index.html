@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Clarity">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Clarity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CLARITY STYLES — section map
+   ============================================================
+     [COLORS]            — color tokens (ported from LockedIn)
+     [BASE]               — html/body resets
+     [HEADER / TABS]       — app title + bottom tab bar
+     [SECTION CARDS]       — generic .section card
+     [FIELD GROUPS]        — label rows, toggles, chips, textarea
+     [SLIDERS]             — drag sliders (generic, any field)
+     [WATER]               — hydration widget (ported)
+     [REPORT CARD]         — weekly report card (ported)
+     [QUICK TAKE]          — quick take card
+     [HISTORY]             — history list + detail
+     [INSIGHTS]            — trend charts, insight cards, export
+   ============================================================ */
+
+/* ===== [COLORS] ============================================ */
+:root {
+  --bg: #0e1117;
+  --surface: #161b22;
+  --surface-hover: #1c2230;
+  --border: rgba(255,255,255,0.06);
+  --text: #e6edf3;
+  --text-dim: #7d8590;
+  --accent: #58a6ff;
+  --accent-glow: rgba(88,166,255,0.15);
+  --green: #3fb950;
+  --green-glow: rgba(63,185,80,0.15);
+  --water: #79c0ff;
+  --water-glow: rgba(121,192,255,0.12);
+  --gold: #e3b341;
+  --orange: #f0883e;
+  --orange-glow: rgba(240,136,62,0.15);
+  --red: #f85149;
+  --red-glow: rgba(248,81,73,0.12);
+  --purple: #bc8cff;
+  --purple-glow: rgba(188,140,255,0.12);
+}
+
+/* ===== [BASE] ============================================== */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+body {
+  padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 84px);
+  padding-top: max(env(safe-area-inset-top), 12px);
+}
+button, textarea { font-family:'DM Sans',sans-serif; }
+textarea { -webkit-tap-highlight-color:transparent; }
+
+/* ===== [HEADER / TABS] ====================================== */
+.header { text-align:center; padding:20px 0 6px; }
+.header h1 {
+  font-size:26px; font-weight:700; letter-spacing:-0.5px;
+  background:linear-gradient(135deg,var(--purple),var(--accent),var(--water));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.header .sub { font-size:12px; color:var(--text-dim); margin-top:2px; font-weight:500; }
+
+.screen { display:none; }
+.screen.active { display:block; }
+
+.tab-bar {
+  position:fixed; left:0; right:0; bottom:0; z-index:80;
+  display:flex; background:var(--surface); border-top:1px solid var(--border);
+  padding:8px 8px calc(env(safe-area-inset-bottom) + 8px);
+  gap:6px;
+}
+.tab-btn {
+  flex:1; background:none; border:none; color:var(--text-dim);
+  font-size:11px; font-weight:600; padding:8px 4px; border-radius:12px;
+  display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer;
+}
+.tab-btn .tab-icon { font-size:18px; }
+.tab-btn.active { color:var(--accent); background:var(--accent-glow); }
+
+/* ===== [SECTION CARDS] ===================================== */
+.section { background:var(--surface); border:1px solid var(--border); border-radius:16px; margin-bottom:14px; overflow:hidden; }
+.section-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; }
+.section-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); }
+.section-badge { font-size:12px; font-weight:600; padding:3px 10px; border-radius:20px; background:var(--accent-glow); color:var(--accent); }
+.section-badge.done { background:var(--green-glow); color:var(--green); }
+.section-body { padding:0 16px 16px; }
+
+/* ===== [FIELD GROUPS] ======================================= */
+.field-group { margin-bottom:18px; }
+.field-group:last-child { margin-bottom:0; }
+.field-label-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.field-label { font-size:14px; font-weight:600; }
+.field-hint { font-size:11px; color:var(--gold); font-weight:600; }
+
+.toggle-row { display:flex; gap:8px; }
+.toggle-btn {
+  flex:1; height:44px; border-radius:12px; border:1px solid var(--border);
+  background:var(--surface-hover); color:var(--text-dim); font-size:13px; font-weight:600;
+  cursor:pointer; transition:all 0.2s;
+}
+.toggle-btn:active { transform:scale(0.97); }
+.toggle-btn.on.yes { background:var(--green-glow); border-color:var(--green); color:var(--green); }
+.toggle-btn.on.no  { background:var(--red-glow); border-color:var(--red); color:var(--red); }
+.toggle-btn.on.neutral { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+
+.chip-row { display:flex; flex-wrap:wrap; gap:8px; }
+.chip {
+  border:1px solid var(--border); background:var(--surface-hover); color:var(--text-dim);
+  font-size:12px; font-weight:600; padding:8px 14px; border-radius:20px; cursor:pointer; transition:all 0.15s;
+}
+.chip:active { transform:scale(0.96); }
+.chip.selected { background:var(--purple-glow); border-color:var(--purple); color:var(--purple); }
+.chip-none {
+  display:block; width:100%; text-align:center; padding:14px; font-size:14px; font-weight:700;
+  border-radius:14px; border:1px solid var(--border); background:var(--surface-hover); color:var(--text);
+  cursor:pointer; transition:all 0.15s;
+}
+.chip-none:active { transform:scale(0.98); }
+.chip-none.selected { background:var(--green-glow); border-color:var(--green); color:var(--green); }
+
+/* ===== [SLIDERS] ============================================ */
+.slider-track { position:relative; height:36px; border-radius:10px; background:var(--surface-hover); border:1px solid var(--border); overflow:hidden; cursor:pointer; -webkit-user-select:none; user-select:none; }
+.slider-fill { position:absolute; top:0; left:0; bottom:0; border-radius:9px; transition:width 0.15s; }
+.slider-notches { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; padding:0 12px; pointer-events:none; }
+.slider-notch { font-size:10px; font-weight:500; color:var(--text-dim); z-index:2; }
+.slider-thumb { position:absolute; top:50%; transform:translate(-50%,-50%); width:20px; height:20px; border-radius:50%; background:white; box-shadow:0 1px 6px rgba(0,0,0,0.4); transition:left 0.15s; z-index:3; }
+.slider-value { font-size:12px; font-weight:600; padding:2px 10px; border-radius:12px; background:var(--surface-hover); color:var(--text-dim); }
+.slider-value.good { background:var(--green-glow); color:var(--green); }
+.slider-value.mid  { background:var(--orange-glow); color:var(--orange); }
+.slider-value.bad  { background:var(--red-glow); color:var(--red); }
+.slider-theme-good .slider-fill { background:linear-gradient(90deg, rgba(248,81,73,0.25), rgba(63,185,80,0.45)); }
+.slider-theme-bad  .slider-fill { background:linear-gradient(90deg, rgba(63,185,80,0.25), rgba(248,81,73,0.45)); }
+
+/* ===== [WATER] =============================================== */
+.water-visual { position:relative; height:110px; border-radius:14px; overflow:hidden; background:rgba(121,192,255,0.04); border:1px solid rgba(121,192,255,0.08); margin-bottom:14px; }
+.water-fill { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(180deg,rgba(121,192,255,0.25),rgba(88,166,255,0.4)); transition:height 0.5s cubic-bezier(0.34,1.56,0.64,1); border-radius:0 0 13px 13px; }
+.water-fill::before { content:''; position:absolute; top:-4px; left:0; right:0; height:8px; background:linear-gradient(90deg,transparent,rgba(121,192,255,0.5) 25%,rgba(121,192,255,0.3) 50%,rgba(121,192,255,0.5) 75%,transparent); animation:wave 3s ease-in-out infinite; }
+@keyframes wave { 0%,100%{transform:translateX(-10px)} 50%{transform:translateX(10px)} }
+.water-label { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; z-index:2; }
+.water-oz { font-size:34px; font-weight:700; color:var(--water); }
+.water-goal { font-size:12px; color:var(--text-dim); font-weight:500; margin-top:1px; }
+.flask-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.flask-label { font-size:12px; color:var(--text-dim); font-weight:600; white-space:nowrap; }
+.flask-pips { display:flex; gap:6px; flex:1; }
+.flask-pip { flex:1; height:32px; border-radius:8px; border:1px solid rgba(121,192,255,0.15); background:rgba(121,192,255,0.04); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--text-dim); transition:all 0.3s; }
+.flask-pip.filled { background:rgba(121,192,255,0.2); border-color:var(--water); color:var(--water); }
+.flask-pip.complete { background:rgba(63,185,80,0.2); border-color:var(--green); color:var(--green); }
+.water-buttons { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.water-btn { background:var(--surface-hover); border:1px solid var(--border); border-radius:10px; color:var(--water); font-size:13px; font-weight:600; padding:10px 2px; cursor:pointer; transition:all 0.15s; text-align:center; }
+.water-btn:active { transform:scale(0.95); background:var(--water-glow); }
+.water-btn.undo { color:var(--text-dim); font-size:12px; }
+
+/* ===== [REPORT CARD] ========================================= */
+.report-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; margin-bottom:14px; overflow:hidden; }
+.report-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; cursor:pointer; }
+.report-toggle { font-size:12px; color:var(--text-dim); transition:transform 0.3s; }
+.report-toggle.open { transform:rotate(180deg); }
+.report-body { max-height:0; overflow:hidden; transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+.report-body.open { max-height:900px; }
+.report-content { padding:8px 16px 16px; }
+.report-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.report-stat { background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center; cursor:pointer; transition:border-color 0.2s, background 0.2s, transform 0.1s; }
+.report-stat:active { transform:scale(0.96); }
+.report-stat.water.active   { border-color:var(--water);  background:var(--water-glow); }
+.report-stat.sleep.active   { border-color:var(--orange); background:var(--orange-glow); }
+.report-stat.completion.active { border-color:var(--green); background:var(--green-glow); }
+.report-stat.skin.active    { border-color:var(--purple); background:var(--purple-glow); }
+.report-stat .stat-value { font-size:22px; font-weight:700; margin-bottom:2px; }
+.report-stat .stat-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); }
+.report-stat.water .stat-value { color:var(--water); }
+.report-stat.sleep .stat-value { color:var(--orange); }
+.report-stat.completion .stat-value { color:var(--green); }
+.report-stat.skin .stat-value { color:var(--purple); }
+.trend-bar { display:flex; gap:4px; align-items:flex-end; height:40px; margin-top:6px; }
+.trend-day { flex:1; border-radius:4px 4px 0 0; transition:height 0.4s; min-height:4px; position:relative; }
+.trend-day .day-label { position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--text-dim); font-weight:500; }
+.trend-legend { display:flex; justify-content:space-between; margin-top:20px; font-size:10px; color:var(--text-dim); font-weight:500; }
+.report-grade { text-align:center; margin-top:12px; padding:12px; border-radius:12px; background:rgba(255,255,255,0.02); border:1px solid var(--border); }
+.report-grade .grade { font-size:28px; font-weight:700; }
+.report-grade .grade-label { font-size:12px; color:var(--text-dim); font-weight:500; margin-top:2px; }
+.no-data-msg { text-align:center; font-size:13px; color:var(--text-dim); padding:16px 0; font-weight:500; }
+
+/* ===== [QUICK TAKE] ========================================== */
+.quicktake-card { background:var(--surface); border:1px solid rgba(188,140,255,0.2); border-radius:16px; padding:14px 16px; margin-bottom:14px; }
+.qt-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.qt-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); }
+.qt-sub { font-size:12px; color:var(--text-dim); margin-bottom:12px; font-weight:500; }
+.qt-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.qt-chip { display:flex; flex-direction:column; align-items:center; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; padding:8px 10px; flex:1; min-width:84px; }
+.qt-chip-label { font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-dim); margin-bottom:3px; text-align:center; }
+.qt-chip-val { font-size:12px; font-weight:600; color:var(--text); text-align:center; }
+.qt-chip-detail { font-size:9px; color:var(--text-dim); margin-top:2px; text-align:center; }
+
+/* ===== [HISTORY] ============================================ */
+.history-list { display:flex; flex-direction:column; gap:8px; }
+.history-row { display:flex; align-items:center; justify-content:space-between; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; cursor:pointer; }
+.history-row:active { background:var(--surface-hover); }
+.hr-date { font-size:13px; font-weight:600; }
+.hr-meta { display:flex; gap:8px; align-items:center; }
+.hr-badge { font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; background:var(--surface-hover); color:var(--text-dim); }
+.back-row { margin-bottom:12px; }
+.back-btn { background:var(--surface); border:1px solid var(--border); color:var(--text-dim); font-size:12px; font-weight:600; padding:8px 14px; border-radius:10px; cursor:pointer; }
+
+/* ===== [INSIGHTS] ============================================ */
+.gate-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px 16px; text-align:center; }
+.gate-progress-bar { height:8px; border-radius:4px; background:var(--surface-hover); overflow:hidden; margin:14px 0; }
+.gate-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--purple)); transition:width 0.4s; }
+.window-toggle { display:flex; gap:8px; margin-bottom:14px; }
+.window-btn { flex:1; padding:8px; border-radius:10px; border:1px solid var(--border); background:var(--surface-hover); color:var(--text-dim); font-size:12px; font-weight:600; cursor:pointer; }
+.window-btn.active { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.export-row { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.export-btn { background:var(--surface-hover); border:1px solid var(--border); color:var(--text); font-size:13px; font-weight:600; padding:12px; border-radius:12px; cursor:pointer; text-align:center; }
+.export-btn:active { transform:scale(0.98); }
+.trend-panel { margin-bottom:14px; }
+.trend-panel-title { font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+.trend-scroll { overflow-x:auto; padding-bottom:16px; }
+.trend-scroll-inner { display:flex; align-items:flex-end; gap:3px; height:60px; min-width:100%; }
+.trend-scroll-inner .trend-day { flex:0 0 10px; }
+.insight-list { display:flex; flex-direction:column; gap:8px; }
+.insight-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+.insight-card.helping { border-left:3px solid var(--green); }
+.insight-card.hurting { border-left:3px solid var(--red); }
+.insight-name { font-size:13px; font-weight:700; margin-bottom:2px; }
+.insight-detail { font-size:12px; color:var(--text-dim); }
+.insight-detail .eff-good { color:var(--green); font-weight:600; }
+.insight-detail .eff-bad { color:var(--red); font-weight:600; }
+.insights-section-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); margin:16px 0 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Clarity</h1>
+  <div class="sub">Skin correlation tracker</div>
+</div>
+
+<!-- ===== TODAY SCREEN ===== -->
+<div class="screen active" id="screen-today">
+  <div id="todayContent"></div>
+</div>
+
+<!-- ===== HISTORY SCREEN ===== -->
+<div class="screen" id="screen-history">
+  <div id="historyListWrap">
+    <div class="history-list" id="historyList"></div>
+  </div>
+  <div id="historyDetailWrap" style="display:none;">
+    <div class="back-row"><button class="back-btn" onclick="closeHistoryDetail()">&larr; Back to list</button></div>
+    <div id="historyDetailContent"></div>
+  </div>
+</div>
+
+<!-- ===== INSIGHTS SCREEN ===== -->
+<div class="screen" id="screen-insights">
+  <div id="insightsContent"></div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabBtn-today" onclick="switchTab('today')"><span class="tab-icon">&#128221;</span>Today</button>
+  <button class="tab-btn" id="tabBtn-history" onclick="switchTab('history')"><span class="tab-icon">&#128197;</span>History</button>
+  <button class="tab-btn" id="tabBtn-insights" onclick="switchTab('insights')"><span class="tab-icon">&#128200;</span>Insights</button>
+</div>
+
+<script>
+/* ============================================================
+   CLARITY SCRIPT — section map
+     [CONFIG]           — product/option lists, slider configs
+     [DATE HELPERS]
+     [STORAGE]          — entry get/set/list, hasAnyData, bible streak
+     [SCHEMA]           — form field schema (drives render + completion + variables)
+     [COMPLETION]       — completion% calc
+     [FIELD RENDER]     — generic field -> HTML
+     [DAILY VIEW]       — shared Today/History render + mutation handlers
+     [WATER]            — water widget
+     [SLIDER DRAG]      — generic drag handling
+     [REPORT CARD]
+     [QUICK TAKE]
+     [TABS]
+     [HISTORY SCREEN]
+     [INSIGHTS: TRENDS]
+     [INSIGHTS: ENGINE]
+     [INSIGHTS: EXPORT]
+     [INSIGHTS: RENDER]
+     [INIT]
+   ============================================================ */
+
+// ============ [CONFIG] ============
+const PRODUCTS = {
+  wash: ["PanOxyl 10% BP","PanOxyl 4% BP","Neutrogena Gentle Foaming Wash","Harry's Exfoliating Scrub"],
+  amMoisturizer: ["CeraVe Moisturizing Cream","Neutrogena Hydro Boost Water Gel"],
+  sunscreen: ["CeraVe Tinted SPF"],
+  pmActive: ["Adapalene","Paula's Choice BHA Liquid Exfoliant"],
+  sleepAid: ["Melatonin","ZzzQuil"],
+};
+const BREAKOUT_LOCATIONS = ["Cheeks","Forehead","Jaw/Chin","Nose","Other"];
+const STRESS_SOURCES = ["Work Shift","Bad Day at Work","Life Worries","Other"];
+const VITAMINS = ["None","Zinc","Fish Oil","Magnesium Glycinate"];
+
+const SLIDERS = {
+  skinRating:  { min:0, max:10, step:1,   label:'Skin Rating',   theme:'good', notches:['Breakout','','Flawless'] },
+  sleepHours:  { min:1, max:9,  step:0.5, label:'Sleep Hours',   theme:'good', notches:['1h','','9h'], unit:'h' },
+  wakeEnergy:  { min:0, max:10, step:1,   label:'Wake Energy',   theme:'good', notches:['Exhausted','','Energized'] },
+  fruitIntake: { min:0, max:10, step:1,   label:'Fruit Intake',  theme:'good', notches:['None','','Plenty'] },
+  veggieIntake:{ min:0, max:10, step:1,   label:'Veggie Intake', theme:'good', notches:['None','','Plenty'] },
+  dairyIntake: { min:0, max:10, step:1,   label:'Dairy Intake',  theme:'bad',  notches:['None','','A Lot'] },
+  alcoholIntake:{min:0, max:10, step:1,   label:'Alcohol Intake',theme:'bad',  notches:['None','','Heavy'] },
+  fastFoodIntensity:{min:0,max:10,step:1, label:'Fast Food',     theme:'bad',  notches:['None','','A Lot'] },
+  stress:      { min:0, max:10, step:1,   label:'Stress',        theme:'bad',  notches:['Calm','','Overwhelmed'] },
+};
+
+const WATER_GOAL_DEFAULT = 130;
+const FLASK_OZ = 40;
+
+// ============ [DATE HELPERS] ============
+function toLocalDateStr(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function getToday() { return toLocalDateStr(new Date()); }
+function parseDate(ds) { const [y,m,d] = ds.split('-').map(Number); return new Date(y, m-1, d); }
+function addDays(ds, n) { const d = parseDate(ds); d.setDate(d.getDate() + n); return toLocalDateStr(d); }
+function daysBetween(a, b) { return Math.round((parseDate(b) - parseDate(a)) / 86400000); }
+function formatDate(ds) {
+  const dt = parseDate(ds);
+  return dt.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+}
+function formatDateShort(ds) {
+  const dt = parseDate(ds);
+  return dt.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+function getWeekDates(anchorDs) {
+  const anchor = parseDate(anchorDs);
+  const dow = anchor.getDay();
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - dow + i);
+    dates.push(toLocalDateStr(d));
+  }
+  return dates;
+}
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// ============ [STORAGE] ============
+function entryKey(ds) { return 'entry:' + ds; }
+
+function defaultEntry(ds) {
+  return {
+    date: ds,
+    water: { total: 0, history: [] },
+    skinRating: null,
+    breakoutLocations: [],
+    amCleanse: { type: null, product: null },
+    amMoisturizer: { used: null, product: null },
+    amSunscreen: { used: null, product: null },
+    sleepHours: null,
+    sleepInterrupted: null,
+    wakeEnergy: null,
+    fruitIntake: null,
+    veggieIntake: null,
+    dairyIntake: null,
+    alcoholIntake: null,
+    fastFoodIntensity: null,
+    workout: null,
+    bible: null,
+    stress: null,
+    stressSources: [],
+    vitamins: [],
+    masturbation: null,
+    pmWash: { used: null, product: null },
+    pmActive: { used: null, product: null },
+    pmMoisturizer: { used: null, product: null },
+    vaseline: null,
+    sleepAid: { used: null, product: null },
+    mouthTape: null,
+    noseStrip: null,
+  };
+}
+
+function loadEntry(ds) {
+  try {
+    const raw = localStorage.getItem(entryKey(ds));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // merge onto default so newly-added fields are always present
+    return Object.assign(defaultEntry(ds), parsed);
+  } catch { return null; }
+}
+
+function hasAnyData(e) {
+  if (!e) return false;
+  if (e.water && e.water.total > 0) return true;
+  if (e.skinRating !== null) return true;
+  if (e.breakoutLocations && e.breakoutLocations.length) return true;
+  if (e.amCleanse && e.amCleanse.type !== null) return true;
+  if (e.amMoisturizer && e.amMoisturizer.used !== null) return true;
+  if (e.amSunscreen && e.amSunscreen.used !== null) return true;
+  if (e.sleepHours !== null) return true;
+  if (e.sleepInterrupted !== null) return true;
+  if (e.wakeEnergy !== null) return true;
+  if ([e.fruitIntake, e.veggieIntake, e.dairyIntake, e.alcoholIntake, e.fastFoodIntensity].some(v => v !== null)) return true;
+  if (e.workout !== null) return true;
+  if (e.bible !== null) return true;
+  if (e.stress !== null) return true;
+  if (e.stressSources && e.stressSources.length) return true;
+  if (e.vitamins && e.vitamins.length) return true;
+  if (e.masturbation !== null) return true;
+  if (e.pmWash && e.pmWash.used !== null) return true;
+  if (e.pmActive && e.pmActive.used !== null) return true;
+  if (e.pmMoisturizer && e.pmMoisturizer.used !== null) return true;
+  if (e.vaseline !== null) return true;
+  if (e.sleepAid && e.sleepAid.used !== null) return true;
+  if (e.mouthTape !== null) return true;
+  if (e.noseStrip !== null) return true;
+  return false;
+}
+
+function saveEntry(e) {
+  if (hasAnyData(e)) localStorage.setItem(entryKey(e.date), JSON.stringify(e));
+  else localStorage.removeItem(entryKey(e.date));
+}
+
+function listLoggedDates() {
+  const dates = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.indexOf('entry:') === 0) dates.push(k.slice(6));
+  }
+  dates.sort();
+  return dates;
+}
+
+function listAllEntries() {
+  return listLoggedDates().map(ds => loadEntry(ds)).filter(e => e && hasAnyData(e));
+}
+
+function getWaterGoal() {
+  const v = parseInt(localStorage.getItem('waterGoal'), 10);
+  return Number.isFinite(v) && v > 0 ? v : WATER_GOAL_DEFAULT;
+}
+if (!localStorage.getItem('waterGoal')) localStorage.setItem('waterGoal', String(WATER_GOAL_DEFAULT));
+
+// ============ [SCHEMA] ============
+// Drives form rendering, completion %, and correlation-variable discovery.
+const SECTIONS = [
+  { title: 'Sleep', fields: [
+    { key:'sleepHours', type:'slider', slider:SLIDERS.sleepHours },
+    { key:'sleepInterrupted', type:'toggle', label:'Interrupted?', positive:false },
+    { key:'wakeEnergy', type:'slider', slider:SLIDERS.wakeEnergy },
+  ]},
+  { title: 'AM Skincare', fields: [
+    { key:'skinRating', type:'slider', slider:SLIDERS.skinRating },
+    { key:'breakoutLocations', type:'chips', label:'Breakout Locations', chipOptions:BREAKOUT_LOCATIONS, showIf:e=>e.skinRating!==null && e.skinRating<7, excludeFromCompletion:true },
+    { key:'amCleanse', type:'cleanse3way', label:'Cleanse', productOptions:PRODUCTS.wash },
+    { key:'amMoisturizer', type:'usedProduct', label:'Moisturizer', productOptions:PRODUCTS.amMoisturizer },
+    { key:'amSunscreen', type:'usedProduct', label:'Sunscreen', productOptions:PRODUCTS.sunscreen },
+  ]},
+  { title: 'Diet', fields: [
+    { key:'fruitIntake', type:'slider', slider:SLIDERS.fruitIntake },
+    { key:'veggieIntake', type:'slider', slider:SLIDERS.veggieIntake },
+    { key:'dairyIntake', type:'slider', slider:SLIDERS.dairyIntake },
+    { key:'alcoholIntake', type:'slider', slider:SLIDERS.alcoholIntake },
+    { key:'fastFoodIntensity', type:'slider', slider:SLIDERS.fastFoodIntensity },
+  ]},
+  { title: 'Lifestyle', fields: [
+    { key:'workout', type:'toggle', label:'Workout' },
+    { key:'bible', type:'toggle', label:'Bible' },
+    { key:'stress', type:'slider', slider:SLIDERS.stress },
+    { key:'stressSources', type:'chips', label:'Stress Sources', chipOptions:STRESS_SOURCES, showIf:e=>e.stress!==null && e.stress>5, excludeFromCompletion:true },
+    { key:'vitamins', type:'chips', label:'Vitamins', chipOptions:VITAMINS },
+    { key:'masturbation', type:'toggle', label:'Masturbation' },
+  ]},
+  { title: 'PM Skincare', fields: [
+    { key:'pmWash', type:'usedProduct', label:'Wash', productOptions:PRODUCTS.wash },
+    { key:'pmActive', type:'usedProduct', label:'Active', productOptions:PRODUCTS.pmActive },
+    { key:'pmMoisturizer', type:'usedProduct', label:'Moisturizer', productOptions:PRODUCTS.amMoisturizer },
+    { key:'vaseline', type:'toggle', label:'Vaseline' },
+  ]},
+  { title: 'Bedtime', fields: [
+    { key:'sleepAid', type:'usedProduct', label:'Sleep Aid', productOptions:PRODUCTS.sleepAid },
+    { key:'mouthTape', type:'toggle', label:'Mouth Tape' },
+    { key:'noseStrip', type:'toggle', label:'Nose Strip' },
+  ]},
+];
+function fieldLabel(field) { return field.label || (field.slider && field.slider.label) || field.key; }
+
+// ============ [COMPLETION] ============
+function isFieldLogged(field, e) {
+  switch (field.type) {
+    case 'slider': return e[field.key] !== null;
+    case 'toggle': return e[field.key] !== null;
+    case 'chips': return Array.isArray(e[field.key]) && e[field.key].length > 0;
+    case 'usedProduct': return e[field.key] && e[field.key].used !== null;
+    case 'cleanse3way': return e[field.key] && e[field.key].type !== null;
+    default: return false;
+  }
+}
+function completionPct(e) {
+  let applicable = 1, logged = (e.water && e.water.total > 0) ? 1 : 0; // water counts as one pseudo-field
+  SECTIONS.forEach(section => section.fields.forEach(field => {
+    if (field.showIf && !field.showIf(e)) return;
+    applicable++;
+    if (isFieldLogged(field, e)) logged++;
+  }));
+  return applicable > 0 ? Math.round((logged / applicable) * 100) : 0;
+}
+
+// ============ [FIELD RENDER] ============
+function sliderColorClass(cfg, value) {
+  const frac = (value - cfg.min) / (cfg.max - cfg.min);
+  if (cfg.theme === 'good') return frac >= 0.7 ? 'good' : frac >= 0.4 ? 'mid' : 'bad';
+  return frac >= 0.7 ? 'bad' : frac >= 0.4 ? 'mid' : 'good';
+}
+function renderSliderField(field, e) {
+  const cfg = field.slider;
+  const val = e[field.key];
+  const pct = val !== null ? ((val - cfg.min) / (cfg.max - cfg.min)) * 100 : 0;
+  const valClass = val !== null ? sliderColorClass(cfg, val) : '';
+  const displayVal = val !== null ? (cfg.step < 1 ? val.toFixed(1) : val) + (cfg.unit || '') : '—';
+  return `
+    <div class="field-group">
+      <div class="field-label-row">
+        <span class="field-label">${cfg.label}</span>
+        <span class="slider-value ${valClass}">${displayVal}${val!==null ? ' / ' + cfg.max : ''}</span>
+      </div>
+      <div class="slider-track slider-theme-${cfg.theme}" data-field="${field.key}" data-min="${cfg.min}" data-max="${cfg.max}" data-step="${cfg.step}">
+        <div class="slider-fill" style="width:${pct}%"></div>
+        <div class="slider-thumb" style="left:${pct}%"></div>
+        <div class="slider-notches">
+          <span class="slider-notch">${cfg.notches[0]}</span>
+          <span class="slider-notch">${cfg.notches[1]}</span>
+          <span class="slider-notch">${cfg.notches[2]}</span>
+        </div>
+      </div>
+    </div>`;
+}
+function renderToggleField(field, e) {
+  const val = e[field.key];
+  // field.positive marks which answer is the "good" one (defaults to Yes=good).
+  // Fields like sleepInterrupted set positive:false so No renders green and Yes renders red.
+  const positive = field.positive !== false;
+  const yesClass = positive ? 'yes' : 'no';
+  const noClass = positive ? 'no' : 'yes';
+  return `
+    <div class="field-group">
+      <div class="field-label-row"><span class="field-label">${field.label}</span></div>
+      <div class="toggle-row">
+        <button class="toggle-btn${val===true?' on '+yesClass:''}" data-action="toggle" data-field="${field.key}" data-value="true">Yes</button>
+        <button class="toggle-btn${val===false?' on '+noClass:''}" data-action="toggle" data-field="${field.key}" data-value="false">No</button>
+      </div>
+    </div>`;
+}
+function renderChipsField(field, e) {
+  if (field.showIf && !field.showIf(e)) return '';
+  const selected = e[field.key] || [];
+  if (field.key === 'vitamins') {
+    const rest = field.chipOptions.filter(o => o !== 'None');
+    return `
+      <div class="field-group">
+        <div class="field-label-row"><span class="field-label">${field.label}</span></div>
+        <button class="chip chip-none${selected.includes('None')?' selected':''}" data-action="chip" data-field="${field.key}" data-value="None">No vitamins today</button>
+        <div class="chip-row" style="margin-top:8px;">
+          ${rest.map(opt => `<button class="chip${selected.includes(opt)?' selected':''}" data-action="chip" data-field="${field.key}" data-value="${opt}">${opt}</button>`).join('')}
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="field-group">
+      <div class="field-label-row"><span class="field-label">${field.label}</span></div>
+      <div class="chip-row">
+        ${field.chipOptions.map(opt => `<button class="chip${selected.includes(opt)?' selected':''}" data-action="chip" data-field="${field.key}" data-value="${opt}">${opt}</button>`).join('')}
+      </div>
+    </div>`;
+}
+function renderUsedProductField(field, e) {
+  const v = e[field.key];
+  let productHtml = '';
+  if (v.used === true) {
+    productHtml = `<div class="chip-row" style="margin-top:8px;">${field.productOptions.map(p => `<button class="chip${v.product===p?' selected':''}" data-action="product" data-field="${field.key}" data-value="${escapeAttr(p)}">${p}</button>`).join('')}</div>`;
+  }
+  return `
+    <div class="field-group">
+      <div class="field-label-row"><span class="field-label">${field.label}</span></div>
+      <div class="toggle-row">
+        <button class="toggle-btn${v.used===true?' on yes':''}" data-action="used" data-field="${field.key}" data-value="true">Yes</button>
+        <button class="toggle-btn${v.used===false?' on no':''}" data-action="used" data-field="${field.key}" data-value="false">No</button>
+      </div>
+      ${productHtml}
+    </div>`;
+}
+function renderCleanse3wayField(field, e) {
+  const v = e[field.key];
+  let productHtml = '';
+  if (v.type === 'wash') {
+    productHtml = `<div class="chip-row" style="margin-top:8px;">${field.productOptions.map(p => `<button class="chip${v.product===p?' selected':''}" data-action="cleanse-product" data-field="${field.key}" data-value="${escapeAttr(p)}">${p}</button>`).join('')}</div>`;
+  }
+  return `
+    <div class="field-group">
+      <div class="field-label-row"><span class="field-label">${field.label}</span></div>
+      <div class="toggle-row">
+        <button class="toggle-btn${v.type==='none'?' on neutral':''}" data-action="cleanse-type" data-field="${field.key}" data-value="none">None</button>
+        <button class="toggle-btn${v.type==='rinse'?' on neutral':''}" data-action="cleanse-type" data-field="${field.key}" data-value="rinse">Rinse</button>
+        <button class="toggle-btn${v.type==='wash'?' on neutral':''}" data-action="cleanse-type" data-field="${field.key}" data-value="wash">Wash</button>
+      </div>
+      ${productHtml}
+    </div>`;
+}
+function renderField(field, e) {
+  if (field.showIf && !field.showIf(e) && field.type !== 'chips') return '';
+  switch (field.type) {
+    case 'slider': return renderSliderField(field, e);
+    case 'toggle': return renderToggleField(field, e);
+    case 'chips': return renderChipsField(field, e);
+    case 'usedProduct': return renderUsedProductField(field, e);
+    case 'cleanse3way': return renderCleanse3wayField(field, e);
+    default: return '';
+  }
+}
+function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escapeAttr(s) { return String(s).replace(/"/g,'&quot;'); }
+
+// ============ [DAILY VIEW] ============
+// Shared render used by both the Today tab and the History edit view.
+let activeContainerId = 'todayContent';
+let activeDate = getToday();
+let activeEntry = loadEntry(activeDate) || defaultEntry(activeDate);
+
+function openDailyView(containerId, ds) {
+  activeContainerId = containerId;
+  activeDate = ds;
+  activeEntry = loadEntry(ds) || defaultEntry(ds);
+  renderDailyView();
+}
+
+function renderWaterWidget(e) {
+  const goal = getWaterGoal();
+  const pct = Math.min((e.water.total / goal) * 100, 100);
+  const numFlasks = Math.ceil(goal / FLASK_OZ);
+  const full = Math.floor(e.water.total / FLASK_OZ), part = e.water.total % FLASK_OZ;
+  let pips = '';
+  for (let i = 0; i < numFlasks; i++) {
+    if (i < full) {
+      const complete = (i + 1) * FLASK_OZ <= goal;
+      pips += `<div class="flask-pip filled${complete?' complete':''}">${FLASK_OZ}</div>`;
+    } else if (i === full && part > 0) {
+      const p = (part / FLASK_OZ) * 100;
+      pips += `<div class="flask-pip" style="background:linear-gradient(to top,rgba(121,192,255,0.2) ${p}%,rgba(121,192,255,0.04) ${p}%);border-color:rgba(121,192,255,0.3);color:var(--water);">${part}</div>`;
+    } else {
+      pips += `<div class="flask-pip"></div>`;
+    }
+  }
+  return `
+    <div class="section">
+      <div class="section-header"><span class="section-title">Water</span><span class="section-badge${e.water.total>=goal?' done':''}">${e.water.total} / ${goal} oz</span></div>
+      <div class="section-body">
+        <div class="water-visual">
+          <div class="water-fill" style="height:${pct}%"></div>
+          <div class="water-label"><div class="water-oz">${e.water.total}</div><div class="water-goal">of ${goal} oz</div></div>
+        </div>
+        <div class="flask-row"><span class="flask-label">Flasks</span><div class="flask-pips">${pips}</div></div>
+        <div class="water-buttons">
+          <button class="water-btn" data-action="water-add" data-amount="10">+10</button>
+          <button class="water-btn" data-action="water-add" data-amount="20">+20</button>
+          <button class="water-btn" data-action="water-add" data-amount="30">+30</button>
+          <button class="water-btn" data-action="water-add" data-amount="40">+40</button>
+          <button class="water-btn undo" data-action="water-undo">&#8617; Undo</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderSectionsHtml(e) {
+  return SECTIONS.map(section => `
+    <div class="section">
+      <div class="section-header"><span class="section-title">${section.title}</span></div>
+      <div class="section-body">
+        ${section.fields.map(f => renderField(f, e)).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderDailyView() {
+  const e = activeEntry;
+  const isToday = e.date === getToday();
+  const container = document.getElementById(activeContainerId);
+  let html = '';
+  if (isToday) {
+    html += `<div class="report-card" id="reportCard">
+      <div class="report-header" onclick="toggleReport()">
+        <span class="section-title">&#128202; Weekly Report Card</span>
+        <span class="report-toggle" id="reportToggle">&#9660;</span>
+      </div>
+      <div class="report-body" id="reportBody"><div class="report-content" id="reportContent"></div></div>
+    </div>`;
+  }
+  html += renderWaterWidget(e);
+  html += renderSectionsHtml(e);
+  html += `<div id="quickTakeWrap"></div>`;
+  container.innerHTML = html;
+  if (isToday) {
+    const rc = document.getElementById('reportCard');
+    if (reportOpen) { document.getElementById('reportBody').classList.add('open'); document.getElementById('reportToggle').classList.add('open'); renderReport(); }
+  }
+  renderQuickTake();
+}
+
+function mutateAndSave(mutator) {
+  mutator(activeEntry);
+  saveEntry(activeEntry);
+  renderDailyView();
+  refreshHistoryListIfVisible();
+}
+
+// ---- Delegated interaction handling ----
+function setupDelegatedHandlers(containerId) {
+  const el = document.getElementById(containerId);
+  el.addEventListener('click', (ev) => {
+    const t = ev.target.closest('[data-action]');
+    if (!t) return;
+    const action = t.dataset.action, field = t.dataset.field;
+    if (action === 'toggle') {
+      const val = t.dataset.value === 'true';
+      mutateAndSave(e => { e[field] = (e[field] === val) ? null : val; });
+    } else if (action === 'chip') {
+      const val = t.dataset.value;
+      mutateAndSave(e => {
+        if (!Array.isArray(e[field])) e[field] = [];
+        if (field === 'vitamins') {
+          if (val === 'None') { e[field] = e[field].includes('None') ? [] : ['None']; return; }
+          const withoutNone = e[field].filter(v => v !== 'None');
+          const idx = withoutNone.indexOf(val);
+          if (idx >= 0) withoutNone.splice(idx, 1); else withoutNone.push(val);
+          e[field] = withoutNone;
+          return;
+        }
+        const idx = e[field].indexOf(val);
+        if (idx >= 0) e[field].splice(idx, 1); else e[field].push(val);
+      });
+    } else if (action === 'used') {
+      const val = t.dataset.value === 'true';
+      mutateAndSave(e => {
+        const cur = e[field].used === val;
+        e[field].used = cur ? null : val;
+        if (e[field].used !== true) e[field].product = null;
+      });
+    } else if (action === 'product') {
+      mutateAndSave(e => { e[field].product = (e[field].product === t.dataset.value) ? null : t.dataset.value; });
+    } else if (action === 'cleanse-type') {
+      const val = t.dataset.value;
+      mutateAndSave(e => {
+        e[field].type = (e[field].type === val) ? null : val;
+        if (e[field].type !== 'wash') e[field].product = null;
+      });
+    } else if (action === 'cleanse-product') {
+      mutateAndSave(e => { e[field].product = (e[field].product === t.dataset.value) ? null : t.dataset.value; });
+    } else if (action === 'water-add') {
+      const amt = parseInt(t.dataset.amount, 10);
+      mutateAndSave(e => { e.water.history.push(amt); e.water.total = Math.max(0, e.water.total + amt); });
+    } else if (action === 'water-undo') {
+      mutateAndSave(e => {
+        if (!e.water.history.length) return;
+        const last = e.water.history.pop();
+        e.water.total = Math.max(0, e.water.total - last);
+      });
+    }
+  });
+}
+
+// ============ [SLIDER DRAG] ============
+// Live drag updates mutate the dragged track's DOM directly (cheap) instead of
+// going through the full mutateAndSave -> renderDailyView() re-render on every
+// pixel of movement. A full re-render replaces the entire innerHTML of the
+// container, which would destroy the very track node being dragged (detaching
+// it from the document mid-gesture) and made dragging feel broken/janky.
+// The full save + re-render only happens once, on release.
+function initSliderDrag(containerId) {
+  const container = document.getElementById(containerId);
+
+  function computeVal(track, clientX) {
+    const rect = track.getBoundingClientRect();
+    const min = parseFloat(track.dataset.min), max = parseFloat(track.dataset.max), step = parseFloat(track.dataset.step);
+    let pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    let val = min + pct * (max - min);
+    val = Math.round(val / step) * step;
+    val = Math.max(min, Math.min(max, val));
+    return Math.round(val * 100) / 100;
+  }
+
+  function updateLiveDOM(track, val) {
+    const field = track.dataset.field;
+    const cfg = SLIDERS[field];
+    const min = parseFloat(track.dataset.min), max = parseFloat(track.dataset.max);
+    const pct = ((val - min) / (max - min)) * 100;
+    track.querySelector('.slider-fill').style.width = pct + '%';
+    track.querySelector('.slider-thumb').style.left = pct + '%';
+    const group = track.closest('.field-group');
+    const valueEl = group && group.querySelector('.slider-value');
+    if (valueEl) {
+      valueEl.textContent = (cfg.step < 1 ? val.toFixed(1) : val) + (cfg.unit || '') + ' / ' + cfg.max;
+      valueEl.className = 'slider-value ' + sliderColorClass(cfg, val);
+    }
+    activeEntry[field] = val;
+  }
+
+  function commit() {
+    saveEntry(activeEntry);
+    renderDailyView();
+    refreshHistoryListIfVisible();
+  }
+
+  let dragTrack = null;
+  container.addEventListener('mousedown', (ev) => {
+    const track = ev.target.closest('.slider-track[data-field]');
+    if (!track) return;
+    dragTrack = track;
+    updateLiveDOM(track, computeVal(track, ev.clientX));
+  });
+  document.addEventListener('mousemove', (ev) => { if (dragTrack) updateLiveDOM(dragTrack, computeVal(dragTrack, ev.clientX)); });
+  document.addEventListener('mouseup', () => { if (dragTrack) { commit(); dragTrack = null; } });
+
+  let touchState = null;
+  container.addEventListener('touchstart', (ev) => {
+    const track = ev.target.closest('.slider-track[data-field]');
+    if (!track) { touchState = null; return; }
+    const t = ev.touches[0];
+    touchState = { track, startX: t.clientX, startY: t.clientY, locked: null };
+  }, { passive: true });
+  container.addEventListener('touchmove', (ev) => {
+    if (!touchState) return;
+    const t = ev.touches[0];
+    const dx = Math.abs(t.clientX - touchState.startX), dy = Math.abs(t.clientY - touchState.startY);
+    if (!touchState.locked) {
+      if (dx < 8 && dy < 8) return;
+      touchState.locked = dx > dy ? 'slider' : 'scroll';
+    }
+    if (touchState.locked === 'slider') { ev.preventDefault(); updateLiveDOM(touchState.track, computeVal(touchState.track, t.clientX)); }
+  }, { passive: false });
+  container.addEventListener('touchend', (ev) => {
+    if (!touchState) return;
+    if (touchState.locked === 'slider') {
+      commit();
+    } else if (touchState.locked === null) {
+      // tap without any drag movement — still apply the value at the tap point
+      updateLiveDOM(touchState.track, computeVal(touchState.track, touchState.startX));
+      commit();
+    }
+    touchState = null;
+  });
+}
+
+// ============ [REPORT CARD] ============
+let reportOpen = false;
+let selectedReportStat = 'skin';
+function toggleReport() {
+  reportOpen = !reportOpen;
+  document.getElementById('reportBody').classList.toggle('open', reportOpen);
+  document.getElementById('reportToggle').classList.toggle('open', reportOpen);
+  if (reportOpen) renderReport();
+}
+function selectReportStat(stat) { selectedReportStat = stat; renderReport(); }
+
+const REPORT_GRADES = [
+  { min: 90, letter: 'A'  }, { min: 80, letter: 'B+' }, { min: 70, letter: 'B'  },
+  { min: 60, letter: 'C+' }, { min: 50, letter: 'C'  }, { min: 0,  letter: 'D'  },
+];
+
+function renderReport() {
+  const el = document.getElementById('reportContent');
+  if (!el) return;
+  const week = getWeekDates(activeDate);
+  const today = getToday();
+  let waterTotal=0, waterCount=0, sleepTotal=0, sleepCount=0, skinValues=[], completionSum=0, completionCount=0, daysLogged=0;
+  const waterByDay=[], sleepByDay=[], skinByDay=[], completionByDay=[];
+  week.forEach(ds => {
+    if (ds > today) { waterByDay.push(null); sleepByDay.push(null); skinByDay.push(null); completionByDay.push(null); return; }
+    const e = loadEntry(ds);
+    if (!e || !hasAnyData(e)) { waterByDay.push(null); sleepByDay.push(null); skinByDay.push(null); completionByDay.push(null); return; }
+    daysLogged++;
+    if (e.water.total > 0) { waterTotal += e.water.total; waterCount++; waterByDay.push(e.water.total); } else waterByDay.push(null);
+    if (e.sleepHours !== null) { sleepTotal += e.sleepHours; sleepCount++; sleepByDay.push(e.sleepHours); } else sleepByDay.push(null);
+    if (e.skinRating !== null) { skinValues.push(e.skinRating); skinByDay.push(e.skinRating); } else skinByDay.push(null);
+    const pct = completionPct(e); completionSum += pct; completionCount++; completionByDay.push(pct);
+  });
+
+  if (daysLogged === 0) { el.innerHTML = `<div class="no-data-msg">No data logged this week yet.</div>`; return; }
+
+  const goal = getWaterGoal();
+  const avgWater = waterCount>0 ? Math.round(waterTotal/waterCount) : '—';
+  const avgSleep = sleepCount>0 ? (sleepTotal/sleepCount).toFixed(1) : '—';
+  const avgCompletion = completionCount>0 ? Math.round(completionSum/completionCount) : 0;
+  const avgSkin = skinValues.length>0 ? (skinValues.reduce((a,b)=>a+b,0)/skinValues.length) : null;
+
+  let gradeScore=0, gradeFactors=0;
+  if (sleepCount>0) { gradeScore += Math.min((parseFloat(avgSleep)/8)*100,100); gradeFactors++; }
+  if (waterCount>0) { gradeScore += Math.min((avgWater/goal)*100,100); gradeFactors++; }
+  if (completionCount>0) { gradeScore += avgCompletion; gradeFactors++; }
+  if (avgSkin!==null) { gradeScore += (avgSkin/10)*100; gradeFactors++; }
+  const overall = gradeFactors>0 ? Math.round(gradeScore/gradeFactors) : 0;
+  const grade = (REPORT_GRADES.find(g=>overall>=g.min) || REPORT_GRADES[REPORT_GRADES.length-1]).letter;
+  const gradeColor = overall>=80 ? 'var(--green)' : overall>=60 ? 'var(--orange)' : 'var(--red)';
+
+  const emptyBar = (i) => `<div class="trend-day" style="height:4px;background:var(--border);"><span class="day-label">${DAY_NAMES[i]}</span></div>`;
+  let barsHtml = '', trendTitle = '', trendRight = '';
+  if (selectedReportStat === 'water') {
+    trendTitle = 'Hydration Trend'; trendRight = `<span style="font-size:11px;color:var(--text-dim);">Goal: ${goal} oz</span>`;
+    barsHtml = waterByDay.map((v,i) => v===null ? emptyBar(i) : `<div class="trend-day" style="height:${Math.min(Math.max(10,(v/goal)*100),100)}%;background:${v>=goal?'var(--green)':v>=goal*0.5?'var(--water)':'var(--orange)'};"><span class="day-label">${DAY_NAMES[i]}</span></div>`).join('');
+  } else if (selectedReportStat === 'sleep') {
+    trendTitle = 'Sleep Trend'; trendRight = `<span style="font-size:11px;color:var(--text-dim);">Goal: 7+ hrs</span>`;
+    barsHtml = sleepByDay.map((v,i) => v===null ? emptyBar(i) : `<div class="trend-day" style="height:${Math.min(Math.max(10,(v/8)*100),100)}%;background:${v>=7?'var(--green)':v>=6?'var(--orange)':'var(--red)'};"><span class="day-label">${DAY_NAMES[i]}</span></div>`).join('');
+  } else if (selectedReportStat === 'completion') {
+    trendTitle = 'Completion Trend'; trendRight = `<span style="font-size:11px;color:var(--text-dim);">Goal: 100%</span>`;
+    barsHtml = completionByDay.map((v,i) => v===null ? emptyBar(i) : `<div class="trend-day" style="height:${Math.max(10,v)}%;background:${v>=80?'var(--green)':v>=50?'var(--orange)':'var(--red)'};"><span class="day-label">${DAY_NAMES[i]}</span></div>`).join('');
+  } else {
+    trendTitle = 'Skin Rating Trend'; trendRight = '';
+    barsHtml = skinByDay.map((v,i) => v===null ? emptyBar(i) : `<div class="trend-day" style="height:${Math.max(10,(v/10)*100)}%;background:${v>=7?'var(--green)':v>=4?'var(--orange)':'var(--red)'};"><span class="day-label">${DAY_NAMES[i]}</span></div>`).join('');
+  }
+
+  const sel = selectedReportStat;
+  el.innerHTML = `
+    <div class="report-stats">
+      <div class="report-stat water${sel==='water'?' active':''}" onclick="selectReportStat('water')"><div class="stat-value">${avgWater}<span style="font-size:13px;font-weight:500;"> oz</span></div><div class="stat-label">Avg Water</div></div>
+      <div class="report-stat sleep${sel==='sleep'?' active':''}" onclick="selectReportStat('sleep')"><div class="stat-value">${avgSleep}<span style="font-size:13px;font-weight:500;"> hrs</span></div><div class="stat-label">Avg Sleep</div></div>
+      <div class="report-stat completion${sel==='completion'?' active':''}" onclick="selectReportStat('completion')"><div class="stat-value">${avgCompletion}%</div><div class="stat-label">Avg Completion</div></div>
+      <div class="report-stat skin${sel==='skin'?' active':''}" onclick="selectReportStat('skin')"><div class="stat-value">${avgSkin!==null?avgSkin.toFixed(1):'—'}<span style="font-size:13px;font-weight:500;">/10</span></div><div class="stat-label">Avg Skin Rating</div></div>
+    </div>
+    <div class="skin-trend">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:600;color:var(--text-dim);">${trendTitle}</span>${trendRight}</div>
+      <div class="trend-bar">${barsHtml}</div>
+      <div class="trend-legend"><span>Sun</span><span>Sat</span></div>
+    </div>
+    <div class="report-grade"><div class="grade" style="color:${gradeColor};">${grade}</div><div class="grade-label">Weekly Grade &middot; ${daysLogged}/7 days logged</div></div>
+  `;
+}
+
+// ============ [QUICK TAKE] ============
+function renderQuickTake() {
+  const wrap = document.getElementById('quickTakeWrap');
+  if (!wrap) return;
+  const e = activeEntry;
+  if (e.date !== getToday()) { wrap.innerHTML = ''; return; }
+  const yesterdayDs = addDays(e.date, -1);
+  const yesterday = loadEntry(yesterdayDs);
+  const gateOk = e.skinRating !== null && yesterday && hasAnyData(yesterday) && completionPct(yesterday) >= 50;
+  if (!gateOk) { wrap.innerHTML = ''; return; }
+
+  const loggedDays = listAllEntries().length;
+  if (loggedDays < 7) {
+    // hardcoded starter set
+    const sleepColor = yesterday.sleepHours===null ? null : yesterday.sleepHours>=7?'var(--green)':yesterday.sleepHours>=6?'var(--orange)':'var(--red)';
+    const dairyColor = yesterday.dairyIntake===null ? null : yesterday.dairyIntake<=3?'var(--green)':yesterday.dairyIntake<=6?'var(--orange)':'var(--red)';
+    const alcoholColor = yesterday.alcoholIntake===null ? null : yesterday.alcoholIntake<=1?'var(--green)':yesterday.alcoholIntake<=4?'var(--orange)':'var(--red)';
+    const workoutColor = yesterday.workout===null ? null : yesterday.workout ? 'var(--green)' : 'var(--text-dim)';
+    const chip = (label, val, color) => `<div class="qt-chip"><span class="qt-chip-label">${label}</span><span class="qt-chip-val" style="color:${color||'var(--text-dim)'};">${val}</span></div>`;
+    wrap.innerHTML = `<div class="quicktake-card">
+      <div class="qt-header"><span class="qt-title">&#10024; Quick Take</span></div>
+      <div class="qt-sub">Yesterday's habits that may have influenced today's skin</div>
+      <div class="qt-chips">
+        ${chip('Sleep', yesterday.sleepHours!==null?yesterday.sleepHours+'h':'—', sleepColor)}
+        ${chip('Dairy', yesterday.dairyIntake!==null?yesterday.dairyIntake+'/10':'—', dairyColor)}
+        ${chip('Alcohol', yesterday.alcoholIntake!==null?yesterday.alcoholIntake+'/10':'—', alcoholColor)}
+        ${chip('Workout', yesterday.workout===null?'—':yesterday.workout?'Yes':'No', workoutColor)}
+      </div>
+    </div>`;
+    return;
+  }
+
+  const engine = runCorrelationEngine(null);
+  const candidates = engine.all
+    .filter(r => r.classify(yesterday) !== undefined)
+    .sort((a,b) => Math.abs(b.score) - Math.abs(a.score))
+    .slice(0, 4);
+  if (candidates.length === 0) { wrap.innerHTML = ''; return; }
+  const chips = candidates.map(r => {
+    const sign = r.effect > 0 ? '+' : '';
+    const color = r.effect > 0 ? 'var(--green)' : 'var(--red)';
+    return `<div class="qt-chip">
+      <span class="qt-chip-label">${escapeHtml(r.name)}</span>
+      <span class="qt-chip-val">${escapeHtml(r.formatValue(yesterday))}</span>
+      <span class="qt-chip-detail" style="color:${color};">${sign}${r.effect.toFixed(1)} @ ${r.lag}d lag</span>
+    </div>`;
+  }).join('');
+  wrap.innerHTML = `<div class="quicktake-card">
+    <div class="qt-header"><span class="qt-title">&#10024; Quick Take</span></div>
+    <div class="qt-sub">Your top habits correlated with skin outcomes, as logged yesterday</div>
+    <div class="qt-chips">${chips}</div>
+  </div>`;
+}
+
+// ============ [TABS] ============
+function switchTab(tab) {
+  ['today','history','insights'].forEach(t => {
+    document.getElementById('screen-' + t).classList.toggle('active', t === tab);
+    document.getElementById('tabBtn-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'today') openDailyView('todayContent', getToday());
+  else if (tab === 'history') renderHistoryList();
+  else if (tab === 'insights') renderInsights();
+}
+
+// ============ [HISTORY SCREEN] ============
+function refreshHistoryListIfVisible() {
+  if (document.getElementById('screen-history').classList.contains('active') && document.getElementById('historyListWrap').style.display !== 'none') renderHistoryList();
+}
+function renderHistoryList() {
+  document.getElementById('historyListWrap').style.display = 'block';
+  document.getElementById('historyDetailWrap').style.display = 'none';
+  const dates = listLoggedDates().slice().reverse();
+  const el = document.getElementById('historyList');
+  if (dates.length === 0) { el.innerHTML = `<div class="no-data-msg">No days logged yet. Start on the Today tab.</div>`; return; }
+  el.innerHTML = dates.map(ds => {
+    const e = loadEntry(ds);
+    const pct = completionPct(e);
+    const skin = e.skinRating !== null ? e.skinRating + '/10' : '—';
+    return `<div class="history-row" onclick="openHistoryDetail('${ds}')">
+      <span class="hr-date">${formatDateShort(ds)}</span>
+      <div class="hr-meta"><span class="hr-badge">${skin} skin</span><span class="hr-badge">${pct}%</span></div>
+    </div>`;
+  }).join('');
+}
+function openHistoryDetail(ds) {
+  document.getElementById('historyListWrap').style.display = 'none';
+  document.getElementById('historyDetailWrap').style.display = 'block';
+  openDailyView('historyDetailContent', ds);
+}
+function closeHistoryDetail() { renderHistoryList(); }
+
+// ============ [INSIGHTS: correlation engine] ============
+function buildVariables(entries) {
+  const vars = [];
+  SECTIONS.forEach(section => section.fields.forEach(field => {
+    if (field.key === 'skinRating') return; // skinRating is the outcome variable, not a predictor
+    if (field.key === 'breakoutLocations') return; // only ever logged same-day as a low skin rating — tautological, not a real predictor
+
+    if (field.type === 'toggle') {
+      vars.push({
+        id: field.key, name: fieldLabel(field),
+        classify: e => e[field.key] === true ? true : e[field.key] === false ? false : undefined,
+        formatValue: e => e[field.key] === true ? 'Yes' : e[field.key] === false ? 'No' : '—',
+      });
+
+    } else if (field.type === 'slider') {
+      const pairs = entries.map(e => ({ date: e.date, v: e[field.key] })).filter(x => x.v !== null && x.v !== undefined);
+      if (pairs.length >= 6) {
+        const sorted = pairs.slice().sort((a,b) => a.v - b.v);
+        const third = Math.floor(sorted.length / 3);
+        const lowDates = new Set(sorted.slice(0, third).map(x => x.date));
+        const highDates = new Set(sorted.slice(sorted.length - third).map(x => x.date));
+        vars.push({
+          id: field.key, name: field.slider.label,
+          classify: e => highDates.has(e.date) ? true : lowDates.has(e.date) ? false : undefined,
+          formatValue: e => e[field.key] !== null ? e[field.key] + (highDates.has(e.date) ? ' (High)' : lowDates.has(e.date) ? ' (Low)' : '') : '—',
+        });
+      }
+
+    } else if (field.type === 'chips') {
+      const options = new Set();
+      entries.forEach(e => (e[field.key] || []).forEach(o => options.add(o)));
+      options.forEach(opt => {
+        vars.push({
+          id: field.key + ':' + opt, name: field.label + ': ' + opt,
+          classify: e => Array.isArray(e[field.key]) ? e[field.key].includes(opt) : undefined,
+          formatValue: e => (Array.isArray(e[field.key]) && e[field.key].includes(opt)) ? 'Yes' : 'No',
+        });
+      });
+
+    } else if (field.type === 'usedProduct') {
+      vars.push({
+        id: field.key + '.used', name: field.label + ' Used',
+        classify: e => { const v = e[field.key]; return v.used === true ? true : v.used === false ? false : undefined; },
+        formatValue: e => e[field.key].used === true ? 'Yes' : e[field.key].used === false ? 'No' : '—',
+      });
+      const products = new Set();
+      entries.forEach(e => { const p = e[field.key] && e[field.key].product; if (p) products.add(p); });
+      products.forEach(prod => {
+        vars.push({
+          id: field.key + '.product:' + prod, name: field.label + ': ' + prod,
+          classify: e => {
+            const f = e[field.key];
+            if (!f || f.used === null || f.used === undefined) return undefined;
+            if (f.used === false) return false;
+            if (!f.product) return undefined;
+            return f.product === prod;
+          },
+          formatValue: e => (e[field.key].used === true && e[field.key].product === prod) ? 'Used' : 'Not used',
+        });
+      });
+
+    } else if (field.type === 'cleanse3way') {
+      const values = new Set();
+      entries.forEach(e => { const c = e[field.key]; if (c && c.type) values.add(c.type === 'wash' ? c.product : c.type); });
+      values.forEach(val => {
+        if (!val) return;
+        const display = val === 'rinse' ? 'Rinse' : val === 'none' ? 'None' : val;
+        vars.push({
+          id: field.key + ':' + val, name: field.label + ': ' + display,
+          classify: e => {
+            const c = e[field.key];
+            if (!c || !c.type) return undefined;
+            if (c.type === 'wash' && !c.product) return undefined;
+            const cv = c.type === 'wash' ? c.product : c.type;
+            return cv === val;
+          },
+          formatValue: e => {
+            const c = e[field.key];
+            if (!c || !c.type) return '—';
+            const cv = c.type === 'wash' ? c.product : c.type;
+            return cv === val ? 'Yes' : 'No';
+          },
+        });
+      });
+    }
+  }));
+  return vars;
+}
+
+function computeVariableStats(entries, byDate, variable) {
+  let best = null;
+  for (let lag = 0; lag <= 4; lag++) {
+    let trueVals = [], falseVals = [];
+    entries.forEach(e => {
+      const cls = variable.classify(e);
+      if (cls === undefined) return;
+      const target = byDate[addDays(e.date, lag)];
+      if (!target || target.skinRating === null || target.skinRating === undefined) return;
+      (cls ? trueVals : falseVals).push(target.skinRating);
+    });
+    if (trueVals.length === 0 || falseVals.length === 0) continue;
+    const n = Math.min(trueVals.length, falseVals.length);
+    if (n < 5) continue;
+    const meanTrue = trueVals.reduce((a,b)=>a+b,0) / trueVals.length;
+    const meanFalse = falseVals.reduce((a,b)=>a+b,0) / falseVals.length;
+    const effect = meanTrue - meanFalse;
+    if (!best || Math.abs(effect) > Math.abs(best.effect)) best = { lag, effect, n };
+  }
+  if (!best) return null;
+  const score = best.effect * Math.min(best.n / 20, 1);
+  return Object.assign({}, variable, { lag: best.lag, effect: best.effect, n: best.n, score });
+}
+
+function runCorrelationEngine(windowDays) {
+  let entries = listAllEntries();
+  if (windowDays) {
+    const cutoff = addDays(getToday(), -windowDays);
+    entries = entries.filter(e => e.date >= cutoff);
+  }
+  const byDate = {}; entries.forEach(e => byDate[e.date] = e);
+  const variables = buildVariables(entries);
+  const all = variables.map(v => computeVariableStats(entries, byDate, v)).filter(r => r !== null);
+  const helping = all.filter(r => r.score > 0).sort((a,b) => b.score - a.score);
+  const hurting = all.filter(r => r.score < 0).sort((a,b) => a.score - b.score);
+  return { helping, hurting, all };
+}
+
+// ============ [INSIGHTS: export] ============
+const CSV_COLUMNS = [
+  ['Date', e => e.date],
+  ['Water_oz', e => e.water.total],
+  ['Skin_Rating', e => e.skinRating],
+  ['Breakout_Locations', e => e.breakoutLocations.join(';')],
+  ['AM_Cleanse_Type', e => e.amCleanse.type],
+  ['AM_Cleanse_Product', e => e.amCleanse.product],
+  ['AM_Moisturizer_Used', e => e.amMoisturizer.used],
+  ['AM_Moisturizer_Product', e => e.amMoisturizer.product],
+  ['AM_Sunscreen_Used', e => e.amSunscreen.used],
+  ['AM_Sunscreen_Product', e => e.amSunscreen.product],
+  ['Sleep_Hours', e => e.sleepHours],
+  ['Sleep_Interrupted', e => e.sleepInterrupted],
+  ['Wake_Energy', e => e.wakeEnergy],
+  ['Fruit_Intake', e => e.fruitIntake],
+  ['Veggie_Intake', e => e.veggieIntake],
+  ['Dairy_Intake', e => e.dairyIntake],
+  ['Alcohol_Intake', e => e.alcoholIntake],
+  ['Fast_Food_Intensity', e => e.fastFoodIntensity],
+  ['Workout', e => e.workout],
+  ['Bible', e => e.bible],
+  ['Stress', e => e.stress],
+  ['Stress_Sources', e => e.stressSources.join(';')],
+  ['Vitamins', e => e.vitamins.join(';')],
+  ['Masturbation', e => e.masturbation],
+  ['PM_Wash_Used', e => e.pmWash.used],
+  ['PM_Wash_Product', e => e.pmWash.product],
+  ['PM_Active_Used', e => e.pmActive.used],
+  ['PM_Active_Product', e => e.pmActive.product],
+  ['PM_Moisturizer_Used', e => e.pmMoisturizer.used],
+  ['PM_Moisturizer_Product', e => e.pmMoisturizer.product],
+  ['Vaseline', e => e.vaseline],
+  ['Sleep_Aid_Used', e => e.sleepAid.used],
+  ['Sleep_Aid_Product', e => e.sleepAid.product],
+  ['Mouth_Tape', e => e.mouthTape],
+  ['Nose_Strip', e => e.noseStrip],
+];
+function csvCell(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function buildCsv() {
+  const entries = listAllEntries();
+  const header = CSV_COLUMNS.map(c => c[0]).join(',');
+  const rows = entries.map(e => CSV_COLUMNS.map(c => csvCell(c[1](e))).join(','));
+  return [header, ...rows].join('\n');
+}
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard')).catch(() => fallbackCopy(text));
+  } else fallbackCopy(text);
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); alert('Copied to clipboard'); } catch { alert('Copy failed — please copy manually.'); }
+  document.body.removeChild(ta);
+}
+function downloadCsv() {
+  const csv = buildCsv();
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'clarity-export-' + getToday() + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function buildInsightsSummary(engine) {
+  const line = r => `${r.name}: ${r.effect > 0 ? '+' : ''}${r.effect.toFixed(1)} avg skin rating @ ${r.lag}-day lag (n=${r.n})`;
+  let out = 'HELPING:\n';
+  out += engine.helping.length ? engine.helping.map(line).join('\n') : '(none found yet)';
+  out += '\n\nHURTING:\n';
+  out += engine.hurting.length ? engine.hurting.map(line).join('\n') : '(none found yet)';
+  return out;
+}
+
+// ============ [INSIGHTS: trend charts] ============
+let insightsRangeMode = 'all'; // 'all' | 'week'
+function trendDatesForRange() {
+  if (insightsRangeMode === 'week') return getWeekDates(getToday());
+  return listLoggedDates();
+}
+function renderTrendPanel(title, dates, getVal) {
+  const bars = dates.map(ds => {
+    const e = loadEntry(ds);
+    const v = e ? getVal(e) : null;
+    if (v === null || v === undefined) return `<div class="trend-day" style="height:4px;background:var(--border);"></div>`;
+    return `<div class="trend-day" style="height:${Math.max(8, Math.min(100, v.pct))}%;background:${v.color};" title="${ds}: ${v.raw}"></div>`;
+  }).join('');
+  return `<div class="trend-panel"><div class="trend-panel-title">${title}</div><div class="trend-scroll"><div class="trend-scroll-inner">${bars}</div></div></div>`;
+}
+function renderAllTrendPanels() {
+  const dates = trendDatesForRange();
+  const goal = getWaterGoal();
+  let html = '';
+  html += renderTrendPanel('Skin Rating', dates, e => e.skinRating===null?null:{raw:e.skinRating, pct:(e.skinRating/10)*100, color: e.skinRating>=7?'var(--green)':e.skinRating>=4?'var(--orange)':'var(--red)'});
+  html += renderTrendPanel('Sleep Hours', dates, e => e.sleepHours===null?null:{raw:e.sleepHours, pct:(e.sleepHours/9)*100, color: e.sleepHours>=7?'var(--green)':e.sleepHours>=6?'var(--orange)':'var(--red)'});
+  html += renderTrendPanel('Stress', dates, e => e.stress===null?null:{raw:e.stress, pct:(e.stress/10)*100, color: e.stress<=3?'var(--green)':e.stress<=6?'var(--orange)':'var(--red)'});
+  html += renderTrendPanel('Water', dates, e => e.water.total<=0?null:{raw:e.water.total, pct:(e.water.total/goal)*100, color: e.water.total>=goal?'var(--green)':e.water.total>=goal*0.5?'var(--water)':'var(--orange)'});
+  return html;
+}
+
+// ============ [INSIGHTS: render] ============
+let insightsWindowMode = 'all'; // 'all' | '90'
+function setInsightsWindow(mode) { insightsWindowMode = mode; renderInsights(); }
+function setInsightsRange(mode) { insightsRangeMode = mode; renderInsights(); }
+
+function renderInsights() {
+  const el = document.getElementById('insightsContent');
+  const loggedCount = listAllEntries().length;
+  if (loggedCount < 7) {
+    const pct = Math.round((loggedCount / 7) * 100);
+    el.innerHTML = `<div class="gate-card">
+      <div style="font-size:15px;font-weight:600;">${loggedCount}/7 days logged — Insights unlocks soon</div>
+      <div class="gate-progress-bar"><div class="gate-progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:12px;color:var(--text-dim);">Keep logging daily and the correlation engine will unlock once you have a week of data.</div>
+    </div>`;
+    return;
+  }
+
+  const windowDays = insightsWindowMode === '90' ? 90 : null;
+  const engine = runCorrelationEngine(windowDays);
+
+  const helpingHtml = engine.helping.length
+    ? engine.helping.slice(0, 12).map(r => `<div class="insight-card helping"><div class="insight-name">${escapeHtml(r.name)}</div><div class="insight-detail"><span class="eff-good">+${r.effect.toFixed(1)}</span> avg skin rating, strongest at ${r.lag}-day lag (n=${r.n})</div></div>`).join('')
+    : `<div class="no-data-msg">Nothing standing out yet.</div>`;
+  const hurtingHtml = engine.hurting.length
+    ? engine.hurting.slice(0, 12).map(r => `<div class="insight-card hurting"><div class="insight-name">${escapeHtml(r.name)}</div><div class="insight-detail"><span class="eff-bad">${r.effect.toFixed(1)}</span> avg skin rating, strongest at ${r.lag}-day lag (n=${r.n})</div></div>`).join('')
+    : `<div class="no-data-msg">Nothing standing out yet.</div>`;
+
+  el.innerHTML = `
+    <div class="export-row">
+      <button class="export-btn" onclick="downloadCsv()">Download Full CSV</button>
+      <button class="export-btn" onclick="copyToClipboard(buildCsv())">Copy Full CSV to Clipboard</button>
+      <button class="export-btn" onclick="copyToClipboard(buildInsightsSummary(runCorrelationEngine(${windowDays === null ? 'null' : windowDays})))">Copy Insights Summary</button>
+    </div>
+
+    <div class="window-toggle">
+      <button class="window-btn${insightsWindowMode==='all'?' active':''}" onclick="setInsightsWindow('all')">All Time</button>
+      <button class="window-btn${insightsWindowMode==='90'?' active':''}" onclick="setInsightsWindow('90')">Last 90 Days</button>
+    </div>
+
+    <div class="insights-section-title">Trends</div>
+    <div class="window-toggle">
+      <button class="window-btn${insightsRangeMode==='all'?' active':''}" onclick="setInsightsRange('all')">All Time</button>
+      <button class="window-btn${insightsRangeMode==='week'?' active':''}" onclick="setInsightsRange('week')">This Week</button>
+    </div>
+    ${renderAllTrendPanels()}
+
+    <div class="insights-section-title">&#128200; Helping</div>
+    <div class="insight-list">${helpingHtml}</div>
+
+    <div class="insights-section-title">&#128201; Hurting</div>
+    <div class="insight-list">${hurtingHtml}</div>
+  `;
+}
+
+// ============ [INIT] ============
+setupDelegatedHandlers('todayContent');
+setupDelegatedHandlers('historyDetailContent');
+initSliderDrag('todayContent');
+initSliderDrag('historyDetailContent');
+openDailyView('todayContent', getToday());
+</script>
+</body>
+</html>
