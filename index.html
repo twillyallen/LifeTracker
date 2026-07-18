@@ -324,6 +324,8 @@ const SLIDERS = {
   alcoholIntake:{min:0, max:10, step:1,   label:'Alcohol Intake',theme:'bad',  notches:['None','','Heavy'] },
   fastFoodIntensity:{min:0,max:10,step:1, label:'Fast Food',     theme:'bad',  notches:['None','','A Lot'] },
   stress:      { min:0, max:10, step:1,   label:'Stress',        theme:'bad',  notches:['Calm','','Overwhelmed'] },
+  moodRating:  { min:0, max:10, step:1,   label:'How Was Today?',theme:'good', notches:[':(','',':)'],
+    labels:['Terrible Day','Bad Day','Rough Day','Tough Day','Meh Day','Okay Day','Decent Day','Good Day','Great Day','Awesome Day','Amazing Day'] },
 };
 
 const WATER_GOAL_DEFAULT = 130;
@@ -388,6 +390,7 @@ function defaultEntry(ds) {
     sleepAid: { used: null, product: null },
     mouthTape: null,
     noseStrip: null,
+    moodRating: null,
   };
 }
 
@@ -426,6 +429,7 @@ function hasAnyData(e) {
   if (e.sleepAid && e.sleepAid.used !== null) return true;
   if (e.mouthTape !== null) return true;
   if (e.noseStrip !== null) return true;
+  if (e.moodRating !== null) return true;
   return false;
 }
 
@@ -495,6 +499,9 @@ const SECTIONS = [
     { key:'mouthTape', type:'toggle', label:'Mouth Tape' },
     { key:'noseStrip', type:'toggle', label:'Nose Strip' },
   ]},
+  { title: 'Reflection', fields: [
+    { key:'moodRating', type:'slider', slider:SLIDERS.moodRating },
+  ]},
 ];
 function fieldLabel(field) { return field.label || (field.slider && field.slider.label) || field.key; }
 
@@ -525,17 +532,21 @@ function sliderColorClass(cfg, value) {
   if (cfg.theme === 'good') return frac >= 0.7 ? 'good' : frac >= 0.4 ? 'mid' : 'bad';
   return frac >= 0.7 ? 'bad' : frac >= 0.4 ? 'mid' : 'good';
 }
+function sliderDisplayText(cfg, val) {
+  if (cfg.labels) return cfg.labels[Math.round((val - cfg.min) / cfg.step)];
+  return (cfg.step < 1 ? val.toFixed(1) : val) + (cfg.unit || '') + ' / ' + cfg.max;
+}
 function renderSliderField(field, e) {
   const cfg = field.slider;
   const val = e[field.key];
   const pct = val !== null ? ((val - cfg.min) / (cfg.max - cfg.min)) * 100 : 0;
   const valClass = val !== null ? sliderColorClass(cfg, val) : '';
-  const displayVal = val !== null ? (cfg.step < 1 ? val.toFixed(1) : val) + (cfg.unit || '') : '—';
+  const displayVal = val !== null ? sliderDisplayText(cfg, val) : '—';
   return `
     <div class="field-group">
       <div class="field-label-row">
         <span class="field-label">${cfg.label}</span>
-        <span class="slider-value ${valClass}">${displayVal}${val!==null ? ' / ' + cfg.max : ''}</span>
+        <span class="slider-value ${valClass}">${displayVal}</span>
       </div>
       <div class="slider-track slider-theme-${cfg.theme}" data-field="${field.key}" data-min="${cfg.min}" data-max="${cfg.max}" data-step="${cfg.step}">
         <div class="slider-fill" style="width:${pct}%"></div>
@@ -810,7 +821,7 @@ function initSliderDrag(containerId) {
     const group = track.closest('.field-group');
     const valueEl = group && group.querySelector('.slider-value');
     if (valueEl) {
-      valueEl.textContent = (cfg.step < 1 ? val.toFixed(1) : val) + (cfg.unit || '') + ' / ' + cfg.max;
+      valueEl.textContent = sliderDisplayText(cfg, val);
       valueEl.className = 'slider-value ' + sliderColorClass(cfg, val);
     }
     activeEntry[field] = val;
@@ -1202,6 +1213,7 @@ const CSV_COLUMNS = [
   ['Sleep_Aid_Product', e => e.sleepAid.product],
   ['Mouth_Tape', e => e.mouthTape],
   ['Nose_Strip', e => e.noseStrip],
+  ['Mood_Rating', e => e.moodRating],
 ];
 function csvCell(v) {
   if (v === null || v === undefined) return '';
